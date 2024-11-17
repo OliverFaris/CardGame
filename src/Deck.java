@@ -15,6 +15,10 @@ public class Deck {
         cardsLeft = cards.size();
     }
 
+    public ArrayList<Card> getCards() {
+        return cards;
+    }
+
     public boolean isEmpty() {
         if (cardsLeft <= 0)
             return true;
@@ -29,5 +33,17 @@ public class Deck {
         if (!isEmpty())
             return null;
         return cards.get(--cardsLeft);
+    }
+
+    public void shuffle() {
+        // shuffle
+        for (int i = 0; i < cards.size() - 1; i++) {
+            int index = (int) (Math.random()*cards.size());
+            Card copy = cards.get(index);
+            cards.set(index, cards.get(i));
+            cards.set(i, copy);
+        }
+
+        cardsLeft = cards.size();
     }
 }
