@@ -47,4 +47,10 @@ public class Deck {
         cardsLeft = cards.size();
 
     }
+
+    public Card dealAndRemove() {
+        if (isEmpty())
+            return null;
+        return cards.remove(--cardsLeft);
+    }
 }
