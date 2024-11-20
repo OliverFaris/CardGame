@@ -88,6 +88,7 @@ public class Game {
             }
             else
                 System.out.println("Invalid move");
+
         }
 
     }
