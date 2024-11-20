@@ -4,7 +4,7 @@ public class Deck {
     private ArrayList<Card> cards;
     private int cardsLeft;
 
-    public Deck(String[] rank, String[] suit, int[] value) {
+    public Deck(char[] rank, char[] suit, int[] value) {
         cards = new ArrayList<Card>();
         for (int i = 0; i < suit.length; i++) {
             for (int j = 0; j < rank.length; j++) {
@@ -30,7 +30,7 @@ public class Deck {
     }
 
     public Card deal() {
-        if (!isEmpty())
+        if (isEmpty())
             return null;
         return cards.get(--cardsLeft);
     }

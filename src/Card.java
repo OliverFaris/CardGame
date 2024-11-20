@@ -1,27 +1,29 @@
 public class Card {
-    private String rank;
-    private String suit;
+    private char rank;
+    private char suit;
     private int value;
+    private String design;
 
-    public Card(String rank, String suit, int value) {
+    public Card(char rank, char suit, int value) {
         this.rank = rank;
         this.suit = suit;
         this.value = value;
+        this.design = "|" + rank + "-" + suit + "|";
     }
 
-    public String getRank() {
+    public char getRank() {
         return rank;
     }
 
-    public void setRank(String rank) {
+    public void setRank(char rank) {
         this.rank = rank;
     }
 
-    public String getSuit() {
+    public char getSuit() {
         return suit;
     }
 
-    public void setSuit(String suit) {
+    public void setSuit(char suit) {
         this.suit = suit;
     }
 
@@ -31,6 +33,10 @@ public class Card {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public String getDesign() {
+        return design;
     }
 
     public String toString() {
