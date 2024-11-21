@@ -9,7 +9,7 @@ public class Game {
     public Game() {
         // Player name input
         Scanner input = new Scanner(System.in);
-        System.out.print("Enter player 1 name: ");
+        System.out.print("Enter your name: ");
         String name1 = input.nextLine();
         this.p1 = new Player(name1);
 
@@ -27,10 +27,21 @@ public class Game {
 
     public static void printInstructions() {
         // Prints instructions
+        System.out.println("  ______   ______   ___     _____   ______   ______   _____   ______   ______    ");
+        System.out.println("/    ___| |      | |   |   '.   .' |_    _| |      | '.   .' |   .  | |    __'   ");
+        System.out.println("\\___   \\  |   '  | |   |_   |   |    |  |   |   '  |  |   |  |   --.' |    __' ");
+        System.out.println("/______/  '______' '_____' '_____'   '__'   |_.'`._| '_____' '__.'._\\ '______'  ");
+        System.out.println("___________________________________________________________________________________");
+        System.out.println("\nWelcome to Solitaire! Here are the rules:\n 1] The goal is to get all the cards into " +
+                "the stack in the correct order (Ex. Ace, then 2, then 3, etc.)\n 2] You can go through your deck " +
+                "to get a desired card by pressing {1}\n 3] Each turn, you can place your card onto the board, " +
+                "into the stack, or move something already on the board\n 4] To reveal hidden cards you must put " +
+                "every card below it in a different location\n 5] An 'X' on a card just means 10");
     }
 
     public void playGame() {
         deck.shuffle();
+        printInstructions();
         setUp();
         gameLoop();
     }
@@ -95,7 +106,8 @@ public class Game {
         Card firstCard = null;
         int xCoord = 0;
         int yCoord = 0;
-        while (true) {
+        int move = 0;
+        while (!deck.isEmpty()) {
             firstCard = deck.getCards().get(deck.getCardsLeft()-1);
 
             display();
@@ -104,7 +116,7 @@ public class Game {
             // User move input
             Scanner input = new Scanner(System.in);
             System.out.print("\nEnter move, press 1 to go to next card, press 0 to put something in the stack: ");
-            int move = input.nextInt();
+            move = input.nextInt();
             xCoord = move/10-1;
             yCoord = move%10-1;
 
