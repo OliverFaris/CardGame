@@ -58,12 +58,10 @@ public class Game {
             System.out.print(deck.getCards().get(i).getDesign() + ", ");
         }
         System.out.println("\n");
+
     }
 
     public void display() {
-        // ATTENTION TEMPORARY
-
-
         // Prints board
         System.out.print("< Board >");
         for (int i = 0; i < board.length; i++) {
@@ -89,43 +87,52 @@ public class Game {
             else if (stack[i] == null && i == 3)
                 System.out.print("  ♦   ");
             else
-                System.out.print(stack[i].getDesign());
+                System.out.print(stack[i].getDesign() + " ");
         }
     }
 
     public void gameLoop() {
+        Card firstCard = null;
+        int xCoord = 0;
+        int yCoord = 0;
         while (true) {
-            display();
+            firstCard = deck.getCards().get(deck.getCardsLeft()-1);
 
-            System.out.println("\nYou have a " + deck.getCards().get(deck.getCardsLeft()-1));
+            display();
+            System.out.println("\nYou have a " + firstCard);
 
             // User move input
             Scanner input = new Scanner(System.in);
             System.out.print("\nEnter move, press 1 to go to next card, press 0 to put something in the stack: ");
             int move = input.nextInt();
+            xCoord = move/10-1;
+            yCoord = move%10-1;
+
             if (move == 1) {
                 // Go to next card
                 deck.getCards().add(0, deck.getCards().remove(deck.getCardsLeft()-1));
             }
             else if (move == 0) {
-                // Places card in stack
                 System.out.print("Enter card coordinates or press 1 if the card you want is the one in your deck: ");
-                int cardCoord = input.nextInt();
+                int cardCoords = input.nextInt();
+
                 // Checks if card is one greater than the one in the stack already
-//                if(cardCoord == 1 && stack[deck.getCards().get(deck.getCardsLeft()-1).getIndex()] == null && deck.getCards().get(deck.getCardsLeft()-1).getValue() == 1)
-//                    stack[deck.getCards().get(deck.getCardsLeft()-1).getIndex()] = deck.deal();
-//                else if (cardCoord == 1 && stack[deck.getCards().get(deck.getCardsLeft()-1).getIndex()].getValue() == deck.getCards().get(deck.getCardsLeft()-1).getValue()+1) {
-//                    stack[deck.getCards().get(deck.getCardsLeft()-1).getIndex()] = deck.deal();
-//                }
-//                else
-//                    System.out.println("Invalid");
+                if(cardCoords == 1 && stack[firstCard.getIndex()] == null && firstCard.getValue() == 1)
+                    // Places card in stack
+                    stack[firstCard.getIndex()] = deck.dealAndRemove();
+                else if (cardCoords == 1 && stack[firstCard.getIndex()] != null && stack[firstCard.getIndex()].getValue() == firstCard.getValue()-1) {
+                    stack[firstCard.getIndex()] = deck.dealAndRemove();
+                }
+                else
+                    System.out.println("Invalid");
 
             }
-
-            // Places move onto board   || move/10 ==0 && board[move%10-1][move/10-1] == null
-            else if (board[move%10-2][move/10-1] != null && board[move%10-1][move/10-1] == null) {
-                if (board[move%10-2][move/10-1].getValue() == deck.getCards().get(deck.getCardsLeft()-1).getValue()+1) {
-                    board[move % 10 - 1][move / 10 - 1] = deck.dealAndRemove();
+            // Places move onto board
+            // If the box above is empty and the box you're on is empty, you can play there
+            else if (board[yCoord -1][xCoord] != null && board[yCoord][xCoord] == null) {
+                // If you're card's value is one less than the card above, you can play there
+                if (board[yCoord -1][xCoord].getValue() == firstCard.getValue()+1) {
+                    board[yCoord][xCoord] = deck.dealAndRemove();
                     System.out.println("\n");
                 }
                 else
