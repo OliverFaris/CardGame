@@ -4,6 +4,7 @@ public class Card {
     private int value;
     private String design;
     private int index;
+    private boolean isHidden;
 
     public Card(char rank, char suit, int value) {
         this.rank = rank;
@@ -18,6 +19,7 @@ public class Card {
             this.index = 2;
         else
             this.index = 3;
+        this.isHidden = false;
     }
 
     public char getRank() {
@@ -50,6 +52,14 @@ public class Card {
 
     public String getDesign() {
         return design;
+    }
+
+    public boolean getIsHidden() {
+        return isHidden;
+    }
+
+    public void setIsHidden(boolean hidden) {
+        isHidden = hidden;
     }
 
     public String toString() {
