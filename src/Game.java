@@ -5,6 +5,7 @@ public class Game {
     Player p1;
     Card[][] board;
     Card[] stack;
+    int cardsLeft;
 
     public Game() {
         // Player name input
@@ -21,8 +22,9 @@ public class Game {
         this.deck = new Deck(ranks, suits, values);
 
         // Board: height, length
-        board = new Card[9][7];
+        board = new Card[19][7];
         stack = new Card[4];
+        cardsLeft = 52;
     }
 
     public static void printInstructions() {
@@ -52,6 +54,7 @@ public class Game {
             for (int j = 0; j < board[i].length; j++) {
                 if (j >i-1) {
                     board[i][j] = deck.dealAndRemove();
+                    cardsLeft--;
                     if (i != j)
                         board[i][j].setIsHidden(true);
                 }
@@ -77,9 +80,12 @@ public class Game {
 
     public void display() {
         // Prints board
+        System.out.println("\n\n\n\n\n\n\n");
         System.out.println("< Board >");
-        System.out.println("     1.    2.    3.    4.    5.    6.    7.");
+        System.out.println("      1.    2.    3.    4.    5.    6.    7.");
         for (int i = 0; i < board.length; i++) {
+            if (i+1 <10)
+                System.out.print(" ");
             System.out.print((i+1) + ". ");
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] != null)
@@ -111,14 +117,10 @@ public class Game {
         }
     }
 
-//    public void addCoordToStack(Card card) {
-//        if (stack[card.getIndex()] == null && card.getValue() == 1)
-//    }
-
     public int findYCoord(int xCoord) {
         if (xCoord >= 7)
             return -1;
-        for (int i = 0; i < board[0].length; i++) {
+        for (int i = 0; i < board.length; i++) {
             if (board[i][xCoord] == null) {
                 return i -1;
             }
@@ -128,15 +130,19 @@ public class Game {
 
     public boolean interactWithStack(Card card, Card cardBelow, int move) {
         if (stack[card.getIndex()] == null && card.getValue() == 1)
-            if (move == 9)
+            if (move == 9) {
                 stack[card.getIndex()] = deck.dealAndRemove();
+                cardsLeft--;
+            }
             else {
                 stack[card.getIndex()] = card;
                 return false;
             }
         else if (stack[card.getIndex()] != null && stack[card.getIndex()].getValue() == card.getValue()-1) {
-            if (move == 9)
+            if (move == 9) {
                 stack[card.getIndex()] = deck.dealAndRemove();
+                cardsLeft--;
+            }
 
             else if (card != null && cardBelow == null && stack[card.getIndex()].getValue() == card.getValue()-1) {
                 stack[card.getIndex()] = card;
@@ -157,7 +163,7 @@ public class Game {
             firstCard = deck.getCards().get(deck.getCardsLeft()-1);
 
             display();
-            System.out.println("\nYou have a " + firstCard);
+            System.out.println("\nYou have a " + firstCard + "   |   You have " + cardsLeft + " cards left");
 
             // User move input
             Scanner input = new Scanner(System.in);
@@ -184,31 +190,50 @@ public class Game {
             // If user enters in coordinates
             // If the box above is empty and the box you're on is empty, you can play there
             else if(move == 9) {
-                System.out.print("{8} to place card from deck onto board | {9} to move card(s) already on board: ");
+                System.out.print("Enter column # where you want your card to go to -OR- Enter card coordinates first then enter the column # of the spot you want to move them, in this form -> xyh: ");
                 move = input.nextInt();
-//                xCoord = move / 10 -1;
-//                yCoord = move % 10 -1;
 
-                if (move == 8) {
-                    System.out.print("Enter column you want to place the last card of into the board: ");
-                    move = input.nextInt();
+                if (move <= 8) {
                     xCoord = move -1;
                     yCoord = findYCoord(xCoord)+1;
                     System.out.println(yCoord);
-                    if (board[yCoord - 1][xCoord] != null && board[yCoord][xCoord] == null) {
+                    // Allow user to put a king in an empty column
+                    if (yCoord == 0 && firstCard.getValue() == 13) {
+                        board[yCoord][xCoord] = deck.dealAndRemove();
+                        cardsLeft--;
+                    }
+                    else if (board[yCoord - 1][xCoord] != null && board[yCoord][xCoord] == null) {
                         // If you're card's value is one less than the card above, you can play there
                         if (board[yCoord - 1][xCoord].getValue() == firstCard.getValue() + 1) {
                             board[yCoord][xCoord] = deck.dealAndRemove();
-                            System.out.println("\n");
-                        } else
+                            cardsLeft--;
+                        }
+                        else
                             System.out.println("Invalid move");
                     }
+                    else
+                        System.out.println("Invalid move");
+                }
+                else {
+                    xCoord = move/100 -1;
+                    yCoord = ((move/10)%10) -1;
+                    int newXCoord = move%10 -1;
+                    int newYCoord = findYCoord(newXCoord);
+                    int range = findYCoord(xCoord) - yCoord +1;
+                    System.out.println("yCoord: " + newYCoord);
+                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (board[yCoord][xCoord] != null && board[yCoord][xCoord].getValue() == board[newYCoord][newXCoord].getValue() -1 ))
+                        for (int i = 0; i < range; i++) {
+                            board[newYCoord+i+1][newXCoord] = board[yCoord+i][xCoord];
+                            board[yCoord+i][xCoord] = null;
+                        }
+
                 }
             }
             else
                 System.out.println("Invalid move");
 
         }
+        System.out.println("You win!");
 
     }
 
