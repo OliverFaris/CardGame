@@ -6,6 +6,7 @@ public class Game {
     Card[][] board;
     Card[] stack;
     int cardsLeft;
+    boolean didUserError;
 
     public Game() {
         // Player name input
@@ -25,6 +26,7 @@ public class Game {
         board = new Card[19][7];
         stack = new Card[4];
         cardsLeft = 52;
+        didUserError = false;
     }
 
     public static void printInstructions() {
@@ -45,51 +47,55 @@ public class Game {
         deck.shuffle();
         printInstructions();
         setUp();
-        gameLoop();
+        System.out.print("Press {Enter} to begin: ");
+        Scanner input = new Scanner(System.in);
+        if (input.nextLine().equals("")) {
+            gameLoop();
+            System.out.println("Congrats " + p1.getName() + ", you completed solitaire!");
+        }
     }
 
+    // Fills board
     public void setUp() {
-        // Fills board
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
+                // Number of cards per row decreases
                 if (j >i-1) {
                     board[i][j] = deck.dealAndRemove();
                     cardsLeft--;
+                    // Card isn't at the top of the deck, make it hidden
                     if (i != j)
                         board[i][j].setIsHidden(true);
                 }
                 else
+                    // All other cards are null
                     board[i][j] = null;
             }
         }
-
-        // Prints whole deck (temporary)
-        // h
-        // e
-        // y
-//        for (int i = 0; i < deck.getCards().size(); i++) {
-//            if (i % 13.0 == 0) {
-//                System.out.println(" ");
-//            }
-//            System.out.print(deck.getCards().get(i).getDesign() + ", ");
-//        }
-//        System.out.println("\n");
-
-
     }
 
+    // Prints board and stack
     public void display() {
-        // Prints board
-        System.out.println("\n\n\n\n\n\n\n");
+        // Display error message
+        if (didUserError) {
+            System.out.println("\n\n\n\nInvalid move, try again\n\n");
+            didUserError = false;
+        }
+        else
+            System.out.println("\n\n\n\n\n\n");
+
         System.out.println("< Board >");
         System.out.println("      1.    2.    3.    4.    5.    6.    7.");
+        // Align and print numbers on the side
         for (int i = 0; i < board.length; i++) {
             if (i+1 <10)
                 System.out.print(" ");
             System.out.print((i+1) + ". ");
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] != null)
-                    if (board[i][j].getIsHidden() == false || board[i+1][j] == null) {
+                    // Displays non-hidden cards
+                    // Checks if a card should be shown or not
+                    if (board[i][j].getIsHidden() == false || (board[i+1][j] == null && board[i][j].getIsHidden())) {
                         board[i][j].setIsHidden(false);
                         System.out.print(board[i][j].getDesign() + " ");
                     }
@@ -117,10 +123,21 @@ public class Game {
         }
     }
 
+    public boolean isBoardEmpty(Card[][] board) {
+        // If the first row is empty, the whole board is empty
+        for (int i = 0; i < board[0].length; i++) {
+            if(board[0][i] != null)
+                return false;
+        }
+        return true;
+    }
+
+    // Finds the highest non-null Y coordinate of a given X coordinate
     public int findYCoord(int xCoord) {
         if (xCoord >= 7)
             return -1;
         for (int i = 0; i < board.length; i++) {
+            // Upon finding the first null, return the index before
             if (board[i][xCoord] == null) {
                 return i -1;
             }
@@ -128,7 +145,9 @@ public class Game {
         return -1;
     }
 
+    // Returns false if a card has to be taken of board
     public boolean interactWithStack(Card card, Card cardBelow, int move) {
+        // Allows user to put in ace from board or deck into an empty stack
         if (stack[card.getIndex()] == null && card.getValue() == 1)
             if (move == 9) {
                 stack[card.getIndex()] = deck.dealAndRemove();
@@ -138,6 +157,7 @@ public class Game {
                 stack[card.getIndex()] = card;
                 return false;
             }
+        // If the card in the stack is one value below the user's card, place their card into the stack
         else if (stack[card.getIndex()] != null && stack[card.getIndex()].getValue() == card.getValue()-1) {
             if (move == 9) {
                 stack[card.getIndex()] = deck.dealAndRemove();
@@ -150,7 +170,7 @@ public class Game {
             }
         }
         else
-            System.out.println("Invalid move.");
+            didUserError = true;
         return true;
     }
 
@@ -159,7 +179,7 @@ public class Game {
         int xCoord = 0;
         int yCoord = 0;
         int move = 0;
-        while (!deck.isEmpty()) {
+        while (!deck.isEmpty() && !isBoardEmpty(board)) {
             firstCard = deck.getCards().get(deck.getCardsLeft()-1);
 
             display();
@@ -169,13 +189,14 @@ public class Game {
             Scanner input = new Scanner(System.in);
             System.out.print("\n{0} to go to next card | {8} to interact with stack | {9} to interact with the board: ");
             move = input.nextInt();
-            // If user wants to go to next card
+
+            // Allows user to go to next card in deck
             if (move == 0) {
                 deck.getCards().add(0, deck.getCards().remove(deck.getCardsLeft()-1));
             }
             // If user wants to interact with stack
             else if (move == 8) {
-                System.out.print("Enter column you want to place the last card of into the stack| {9} to place the card you have in the stack: ");
+                System.out.print("Enter column you want to place the last card of into the stack -OR- {9} to place the card you have in the stack: ");
                 move = input.nextInt();
 
                 if (move ==9)
@@ -195,13 +216,14 @@ public class Game {
 
                 if (move <= 8) {
                     xCoord = move -1;
+                    // yCoord is +1 because it represents the space below the last card of the column
                     yCoord = findYCoord(xCoord)+1;
-                    System.out.println(yCoord);
                     // Allow user to put a king in an empty column
                     if (yCoord == 0 && firstCard.getValue() == 13) {
                         board[yCoord][xCoord] = deck.dealAndRemove();
                         cardsLeft--;
                     }
+                    // Checks for valid space
                     else if (board[yCoord - 1][xCoord] != null && board[yCoord][xCoord] == null) {
                         // If you're card's value is one less than the card above, you can play there
                         if (board[yCoord - 1][xCoord].getValue() == firstCard.getValue() + 1) {
@@ -209,32 +231,33 @@ public class Game {
                             cardsLeft--;
                         }
                         else
-                            System.out.println("Invalid move");
+                            didUserError = true;
                     }
                     else
-                        System.out.println("Invalid move");
+                        didUserError = true;
                 }
                 else {
+                    // Separates the 3 digit input into respective coordinates
                     xCoord = move/100 -1;
                     yCoord = ((move/10)%10) -1;
                     int newXCoord = move%10 -1;
                     int newYCoord = findYCoord(newXCoord);
+                    // How many cards are being moved is the range
                     int range = findYCoord(xCoord) - yCoord +1;
-                    System.out.println("yCoord: " + newYCoord);
-                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (board[yCoord][xCoord] != null && board[yCoord][xCoord].getValue() == board[newYCoord][newXCoord].getValue() -1 ))
+                    // Checks to see if it's a valid move
+                    // Allows user to put a king into a space in the first row of the board
+                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (board[yCoord][xCoord] != null && board[newYCoord][newXCoord].getValue() == board[yCoord][xCoord].getValue()+1 ))
                         for (int i = 0; i < range; i++) {
                             board[newYCoord+i+1][newXCoord] = board[yCoord+i][xCoord];
                             board[yCoord+i][xCoord] = null;
                         }
-
+                    else
+                        didUserError = true;
                 }
             }
             else
-                System.out.println("Invalid move");
-
+                didUserError = true;
         }
-        System.out.println("You win!");
-
     }
 
     public static void main(String[] args) {
