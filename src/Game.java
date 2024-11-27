@@ -7,6 +7,7 @@ public class Game {
     Card[] stack;
     int cardsLeft;
     boolean didUserError;
+    boolean isCardsLeft;
 
     public Game() {
         // Player name input
@@ -27,6 +28,7 @@ public class Game {
         stack = new Card[4];
         cardsLeft = 52;
         didUserError = false;
+        isCardsLeft = true;
     }
 
     public static void printInstructions() {
@@ -51,7 +53,7 @@ public class Game {
         Scanner input = new Scanner(System.in);
         if (input.nextLine().equals("")) {
             gameLoop();
-            System.out.println("Congrats " + p1.getName() + ", you completed solitaire!");
+            System.out.println("\n\nI went ahead and finished the board for you since you revealed all the hidden cards and cleared your deck too. So congrats " + p1.getName() + ", you completed solitaire!");
         }
     }
 
@@ -123,12 +125,14 @@ public class Game {
         }
     }
 
-    public boolean isBoardEmpty(Card[][] board) {
+    public boolean didUserWin() {
         // If the first row is empty, the whole board is empty
         for (int i = 0; i < board[0].length; i++) {
-            if(board[0][i] != null)
+            if(board[0][i] != null && board[0][i].getIsHidden() == true)
                 return false;
         }
+        if (!deck.isEmpty())
+            return false;
         return true;
     }
 
@@ -149,7 +153,7 @@ public class Game {
     public boolean interactWithStack(Card card, Card cardBelow, int move) {
         // Allows user to put in ace from board or deck into an empty stack
         if (stack[card.getIndex()] == null && card.getValue() == 1)
-            if (move == 9) {
+            if (move == 0) {
                 stack[card.getIndex()] = deck.dealAndRemove();
                 cardsLeft--;
             }
@@ -159,7 +163,7 @@ public class Game {
             }
         // If the card in the stack is one value below the user's card, place their card into the stack
         else if (stack[card.getIndex()] != null && stack[card.getIndex()].getValue() == card.getValue()-1) {
-            if (move == 9) {
+            if (move == 0) {
                 stack[card.getIndex()] = deck.dealAndRemove();
                 cardsLeft--;
             }
@@ -179,39 +183,47 @@ public class Game {
         int xCoord = 0;
         int yCoord = 0;
         int move = 0;
-        while (!deck.isEmpty() && !isBoardEmpty(board)) {
-            firstCard = deck.getCards().get(deck.getCardsLeft()-1);
-
+        while (!didUserWin()) {
             display();
-            System.out.println("\nYou have a " + firstCard + "   |   You have " + cardsLeft + " cards left");
+
+            if (!deck.isEmpty()) {
+                firstCard = deck.getCards().get(deck.getCardsLeft() - 1);
+                System.out.println("\nYou have a " + firstCard + "   |   You have " + cardsLeft + " cards left");
+            }
+            else {
+                System.out.println("\nYou have no more cards left in your deck");
+            }
 
             // User move input
             Scanner input = new Scanner(System.in);
-            System.out.print("\n{0} to go to next card | {8} to interact with stack | {9} to interact with the board: ");
+            System.out.print("\n{0} to go to next card | {1} to interact with stack | {2} to interact with board: ");
             move = input.nextInt();
 
             // Allows user to go to next card in deck
-            if (move == 0) {
+            if (!deck.isEmpty() && move == 0) {
                 deck.getCards().add(0, deck.getCards().remove(deck.getCardsLeft()-1));
             }
             // If user wants to interact with stack
-            else if (move == 8) {
-                System.out.print("Enter column you want to place the last card of into the stack -OR- {9} to place the card you have in the stack: ");
+            else if (move == 1) {
+                System.out.print("{0} to place your card into the stack -OR- Enter column # to place the last card of" +
+                        "it into the stack: ");
                 move = input.nextInt();
 
-                if (move ==9)
-                    interactWithStack(firstCard, null, 9);
+                if (!deck.isEmpty() && move ==0)
+                    interactWithStack(firstCard, null, 0);
                 else {
                     xCoord = move - 1;
                     yCoord = findYCoord(xCoord);
-                    if (!interactWithStack(board[yCoord][xCoord], board[yCoord + 1][xCoord], 0))
+                    if (!interactWithStack(board[yCoord][xCoord], board[yCoord + 1][xCoord], -1))
                         board[yCoord][xCoord] = null;
                 }
             }
             // If user enters in coordinates
             // If the box above is empty and the box you're on is empty, you can play there
-            else if(move == 9) {
-                System.out.print("Enter column # where you want your card to go to -OR- Enter card coordinates first then enter the column # of the spot you want to move them, in this form -> xyh: ");
+            else if(move == 2) {
+                System.out.print("Enter column # to place your card in -OR- Enter card coordinates first, then enter" +
+                        "the column # you want to move the card(s) to, in this form -> xyh (If you are moving" +
+                        "multiple cards type the coordinates of the card with the lowest index #: ");
                 move = input.nextInt();
 
                 if (move <= 8) {
@@ -219,14 +231,14 @@ public class Game {
                     // yCoord is +1 because it represents the space below the last card of the column
                     yCoord = findYCoord(xCoord)+1;
                     // Allow user to put a king in an empty column
-                    if (yCoord == 0 && firstCard.getValue() == 13) {
+                    if (!deck.isEmpty() && yCoord == 0 && firstCard.getValue() == 13) {
                         board[yCoord][xCoord] = deck.dealAndRemove();
                         cardsLeft--;
                     }
                     // Checks for valid space
                     else if (board[yCoord - 1][xCoord] != null && board[yCoord][xCoord] == null) {
                         // If you're card's value is one less than the card above, you can play there
-                        if (board[yCoord - 1][xCoord].getValue() == firstCard.getValue() + 1) {
+                        if (!deck.isEmpty() && board[yCoord - 1][xCoord].getValue() == firstCard.getValue() + 1) {
                             board[yCoord][xCoord] = deck.dealAndRemove();
                             cardsLeft--;
                         }
