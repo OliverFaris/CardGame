@@ -38,10 +38,11 @@ public class Game {
         System.out.println("\\___   \\  |   '  | |   |_   |   |    |  |   |   '  |  |   |  |   --.' |    __' ");
         System.out.println("/______/  '______' '_____' '_____'   '__'   |_.'`._| '_____' '__.'._\\ '______'  ");
         System.out.println("\nWelcome to Solitaire! Here are the rules:\n 1] The goal is to get all the cards into " +
-                "the stack in the correct order (Ex. Ace, then 2, then 3, etc.)\n 2] You can go through your deck " +
-                "to get a desired card by pressing {1}\n 3] Each turn, you can place your card onto the board, " +
-                "into the stack, or move something already on the board\n 4] To reveal hidden cards you must put " +
-                "every card below it in a different location\n 5] An 'X' on a card just means 10");
+                "the stack in the correct order (Ex. Ace, then 2, then 3, etc.)\n 2] Each turn, you can go to the " +
+                "next card in your deck, interact with the stack, or interact with the board\n 4] To reveal hidden " +
+                "cards you must remove all cards above them\n 5] You can move multiple cards at once if they're all" +
+                " on the board (When moving 2 or more cards enter the card's coordinates with the lowest index)\n 6]" +
+                " Quick tips: An 'X' on a card just means 10  |  There are no colored cards to make it easier for you");
         System.out.println("___________________________________________________________________________________");
     }
 
@@ -53,7 +54,9 @@ public class Game {
         Scanner input = new Scanner(System.in);
         if (input.nextLine().equals("")) {
             gameLoop();
-            System.out.println("\n\nI went ahead and finished the board for you since you revealed all the hidden cards and cleared your deck too. So congrats " + p1.getName() + ", you completed solitaire!");
+            System.out.println("\n\nI'll spare you the time of putting all this into the stack so I went ahead and "+
+                    "finished the board for you since you revealed all the hidden cards and cleared your deck too." +
+                    "\nSo congrats " + p1.getName() + ", you completed solitaire!");
         }
     }
 
@@ -205,7 +208,7 @@ public class Game {
             }
             // If user wants to interact with stack
             else if (move == 1) {
-                System.out.print("{0} to place your card into the stack -OR- Enter column # to place the last card of" +
+                System.out.print("{0} to place your card into the stack -OR- Enter column # to place the last card of "+
                         "it into the stack: ");
                 move = input.nextInt();
 
@@ -221,9 +224,8 @@ public class Game {
             // If user enters in coordinates
             // If the box above is empty and the box you're on is empty, you can play there
             else if(move == 2) {
-                System.out.print("Enter column # to place your card in -OR- Enter card coordinates first, then enter" +
-                        "the column # you want to move the card(s) to, in this form -> xyh (If you are moving" +
-                        "multiple cards type the coordinates of the card with the lowest index #: ");
+                System.out.print("Enter column # to place your card into -OR- Enter the card's coordinates you want" +
+                        " to move, then enter the column # you want to move the card(s) to, in this form -> xyh: ");
                 move = input.nextInt();
 
                 if (move <= 8) {
@@ -258,7 +260,7 @@ public class Game {
                     int range = findYCoord(xCoord) - yCoord +1;
                     // Checks to see if it's a valid move
                     // Allows user to put a king into a space in the first row of the board
-                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (board[yCoord][xCoord] != null && board[newYCoord][newXCoord].getValue() == board[yCoord][xCoord].getValue()+1 ))
+                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (!board[yCoord][xCoord].getIsHidden() && board[yCoord][xCoord] != null && board[newYCoord][newXCoord].getValue() == board[yCoord][xCoord].getValue()+1 ))
                         for (int i = 0; i < range; i++) {
                             board[newYCoord+i+1][newXCoord] = board[yCoord+i][xCoord];
                             board[yCoord+i][xCoord] = null;
