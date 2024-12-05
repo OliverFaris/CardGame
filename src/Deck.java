@@ -19,6 +19,7 @@ public class Deck {
         return cards;
     }
 
+    // Checks if deck is empty
     public boolean isEmpty() {
         if (cardsLeft <= 0)
             return true;
@@ -35,6 +36,7 @@ public class Deck {
         return cards.get(--cardsLeft);
     }
 
+    // Shuffles cards
     public void shuffle() {
         // shuffle
         for (int i = 0; i < cards.size() - 1; i++) {
@@ -48,6 +50,8 @@ public class Deck {
 
     }
 
+    // Deals the card and removes it from the deck
+    // Makes it easier to cycle through the deck because it removes cards that shouldn't be in the deck anymore
     public Card dealAndRemove() {
         if (isEmpty())
             return null;
