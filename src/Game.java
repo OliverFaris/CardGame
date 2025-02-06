@@ -9,6 +9,9 @@ public class Game {
     int cardsLeft;
     boolean didUserError;
 
+    // Window
+    SolitaireViewer window;
+
     public Game() {
         // Player name input
         Scanner input = new Scanner(System.in);
@@ -27,6 +30,8 @@ public class Game {
         stack = new Card[4];
         cardsLeft = 52;
         didUserError = false;
+
+        window = new SolitaireViewer(this);
     }
 
     // Calls other methods
