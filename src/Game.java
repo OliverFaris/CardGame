@@ -196,6 +196,7 @@ public class Game {
         int move = 0;
         while (!didUserWin()) {
             display();
+            window.repaint();
 
             if (!deck.isEmpty()) {
                 firstCard = deck.getCards().get(deck.getCardsLeft() - 1);

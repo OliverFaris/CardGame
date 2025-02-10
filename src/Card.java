@@ -1,3 +1,5 @@
+import java.awt.*;
+
 public class Card {
     private char rank;
     private char suit;
@@ -5,6 +7,11 @@ public class Card {
     private String design;
     private int index;
     private boolean isHidden;
+
+    private Image cardImage;
+    private int x;
+    private int y;
+    private boolean isDrawn;
 
     public Card(char rank, char suit, int value) {
         this.rank = rank;
@@ -20,6 +27,9 @@ public class Card {
         else
             this.index = 3;
         this.isHidden = false;
+
+        this.cardImage = cardImage;
+        this.isDrawn = false;
     }
 
     public char getRank() {
