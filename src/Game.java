@@ -2,12 +2,16 @@
 import java.util.Scanner;
 
 public class Game {
-    Deck deck;
-    Player p1;
-    Card[][] board;
-    Card[] stack;
-    int cardsLeft;
-    boolean didUserError;
+    private Deck deck;
+    private Player p1;
+    private Card[][] board;
+    private Card[] stack;
+    private int cardsLeft;
+    private boolean didUserError;
+    private int phase;
+    private final int TITLE_SCREEN = 0;
+    private final int BACKGROUND_SCREEN = 1;
+    private final int END_SCREEN = 2;
 
     // Window
     SolitaireViewer window;
@@ -23,15 +27,33 @@ public class Game {
         char[] ranks = {'A','2','3','4','5','6','7','8','9','X','J','Q','K'};
         char[] suits = {'♣', '♠', '♥', '♦'};
         int[] values = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-
-        this.deck = new Deck(ranks, suits, values);
+        window = new SolitaireViewer(this);
+        this.deck = new Deck(ranks, suits, values, window);
         // Board: height, length
         board = new Card[19][7];
+
         stack = new Card[4];
         cardsLeft = 52;
         didUserError = false;
+        this.phase = TITLE_SCREEN;
 
-        window = new SolitaireViewer(this);
+        window.repaint();
+    }
+
+    public Card[][] getBoard() {
+        return board;
+    }
+
+    public Deck getDeck() {
+        return deck;
+    }
+
+    public Card[] getStack() {
+        return stack;
+    }
+
+    public int getPhase() {
+        return phase;
     }
 
     // Calls other methods
@@ -42,7 +64,9 @@ public class Game {
         System.out.print("Press {Enter} to begin: ");
         Scanner input = new Scanner(System.in);
         if (input.nextLine().equals("")) {
+            phase = BACKGROUND_SCREEN;
             gameLoop();
+            phase = END_SCREEN;
             System.out.println("\n\nI'll spare you the time of putting all this into the stack so I went ahead and "+
                     "finished the board for you since you revealed all the hidden cards and cleared your deck too." +
                     "\nSo congrats " + p1.getName() + ", you completed solitaire!");
@@ -51,6 +75,7 @@ public class Game {
 
     // Prints instructions
     public static void printInstructions() {
+        System.out.print("\n");
         System.out.println("  ______   ______   ___     _____   ______   ______   _____   ______   ______    ");
         System.out.println("/    ___| |      | |   |   '.   .' |_    _| |      | '.   .' |   .  | |    __'   ");
         System.out.println("\\___   \\  |   '  | |   |_   |   |    |  |   |   '  |  |   |  |   --.' |    __' ");
@@ -72,6 +97,9 @@ public class Game {
                 if (j >i-1) {
                     board[i][j] = deck.dealAndRemove();
                     cardsLeft--;
+                    board[i][j].setDrawn(true);
+                    board[i][j].setX(j);
+                    board[i][j].setY(i);
                     // Card isn't at the top of the row, make it hidden
                     if (i != j)
                         board[i][j].setIsHidden(true);
@@ -86,6 +114,7 @@ public class Game {
     // Prints board and stack
     public void display() {
         // Display error message
+
         if (didUserError) {
             System.out.println("\n\n\n\nInvalid move, try again\n\n");
             didUserError = false;
@@ -107,6 +136,9 @@ public class Game {
                     if (board[i][j].getIsHidden() == false || (board[i+1][j] == null && board[i][j].getIsHidden())) {
                         board[i][j].setIsHidden(false);
                         System.out.print(board[i][j].getDesign() + " ");
+                        board[i][j].setDrawn(true);
+                        board[i][j].setX(j);
+                        board[i][j].setY(i);
                     }
                     else
                         System.out.print("| ? | ");
@@ -115,6 +147,7 @@ public class Game {
             }
             System.out.print("\n");
         }
+        window.repaint();
 
         // Prints the stack
         System.out.println("\n< Stack >");
@@ -196,8 +229,6 @@ public class Game {
         int move = 0;
         while (!didUserWin()) {
             display();
-            window.repaint();
-
             if (!deck.isEmpty()) {
                 firstCard = deck.getCards().get(deck.getCardsLeft() - 1);
                 System.out.println("\nYou have a " + firstCard + "   |   You have " + cardsLeft + " cards left");

@@ -12,8 +12,9 @@ public class Card {
     private int x;
     private int y;
     private boolean isDrawn;
+    private SolitaireViewer screen;
 
-    public Card(char rank, char suit, int value) {
+    public Card(char rank, char suit, int value, Image cardImage, SolitaireViewer screen) {
         this.rank = rank;
         this.suit = suit;
         this.value = value;
@@ -28,8 +29,39 @@ public class Card {
             this.index = 3;
         this.isHidden = false;
 
+        this.x = 0;
+        this.y = 0;
         this.cardImage = cardImage;
         this.isDrawn = false;
+        this.screen = screen;
+    }
+
+    public void draw(Graphics g) {
+        if(isHidden)
+            g.drawImage(screen.getUtilityCards()[0],40+ (x*85), 78 +(y*80), screen);
+        else if (isDrawn) {
+            g.drawImage(cardImage, 40+ (x*85), 78+(y*80), screen);
+        }
+    }
+
+    public Image getCardImage() {
+        return cardImage;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public boolean getDrawn() {
+        return isDrawn;
+    }
+
+    public void setDrawn(boolean drawn) {
+        isDrawn = drawn;
     }
 
     public char getRank() {
