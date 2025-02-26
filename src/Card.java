@@ -38,9 +38,9 @@ public class Card {
 
     public void draw(Graphics g) {
         if(isHidden)
-            g.drawImage(screen.getUtilityCards()[0],40+ (x*85), 78 +(y*80), screen);
+            g.drawImage(screen.getUtilityCards()[0],40+ (x*85), 78 +(y*70), screen);
         else if (isDrawn) {
-            g.drawImage(cardImage, 40+ (x*85), 78+(y*80), screen);
+            g.drawImage(cardImage, 40+ (x*85), 78+(y*70), screen);
         }
     }
 

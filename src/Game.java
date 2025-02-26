@@ -14,7 +14,7 @@ public class Game {
     private final int END_SCREEN = 2;
 
     // Window
-    SolitaireViewer window;
+    private SolitaireViewer window;
 
     public Game() {
         // Player name input
@@ -56,6 +56,10 @@ public class Game {
         return phase;
     }
 
+    public boolean isDidUserError() {
+        return didUserError;
+    }
+
     // Calls other methods
     public void playGame() {
         deck.shuffle();
@@ -67,6 +71,7 @@ public class Game {
             phase = BACKGROUND_SCREEN;
             gameLoop();
             phase = END_SCREEN;
+            window.repaint();
             System.out.println("\n\nI'll spare you the time of putting all this into the stack so I went ahead and "+
                     "finished the board for you since you revealed all the hidden cards and cleared your deck too." +
                     "\nSo congrats " + p1.getName() + ", you completed solitaire!");
@@ -267,6 +272,7 @@ public class Game {
                         " to move, then enter the column # you want to move the card(s) to, in this form -> xyh: ");
                 move = input.nextInt();
 
+                // Moving card from deck to board
                 if (move <= 7) {
                     xCoord = move -1;
                     // yCoord is +1 because it represents the space below the last card of the column
@@ -276,6 +282,8 @@ public class Game {
                         board[yCoord][xCoord] = deck.dealAndRemove();
                         cardsLeft--;
                     }
+                    else if (!deck.isEmpty() && yCoord == 0 && firstCard.getValue() != 13)
+                        didUserError = true;
                     // Checks for valid space
                     else if (board[yCoord - 1][xCoord] != null && board[yCoord][xCoord] == null && !deck.isEmpty() && board[yCoord - 1][xCoord].getValue() == firstCard.getValue() + 1) {
                         board[yCoord][xCoord] = deck.dealAndRemove();
@@ -284,6 +292,8 @@ public class Game {
                     else
                         didUserError = true;
                 }
+
+                // Moving card on board to another spot
                 else {
                     // Separates the 4 digit input into respective coordinates
                     if (move > 1000) {
@@ -300,11 +310,19 @@ public class Game {
                     // How many cards are being moved is the range
                     int range = findYCoord(xCoord) - yCoord +1;
                     // Checks to see if it's a valid move and allows user to put a king into a space in the first row of the board
-                    if ((newYCoord == -1 && board[yCoord][xCoord].getValue() == 13) || (board[yCoord][xCoord] != null && !board[yCoord][xCoord].getIsHidden() && board[newYCoord][newXCoord].getValue() == board[yCoord][xCoord].getValue()+1 ))
+                    if (newYCoord == -1 && board[yCoord][xCoord].getValue() == 13)
                         for (int i = 0; i < range; i++) {
                             board[newYCoord+i+1][newXCoord] = board[yCoord+i][xCoord];
                             board[yCoord+i][xCoord] = null;
                         }
+                    else if (newYCoord == -1 && board[yCoord][xCoord].getValue() != 13)
+                        didUserError = true;
+                    else if (board[yCoord][xCoord] != null && !board[yCoord][xCoord].getIsHidden() && board[newYCoord][newXCoord].getValue() == board[yCoord][xCoord].getValue()+1) {
+                        for (int i = 0; i < range; i++) {
+                            board[newYCoord+i+1][newXCoord] = board[yCoord+i][xCoord];
+                            board[yCoord+i][xCoord] = null;
+                        }
+                    }
                     else
                         didUserError = true;
                 }
